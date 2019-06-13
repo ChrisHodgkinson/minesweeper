@@ -101,6 +101,12 @@ end
 local function zoneClicked( event )
   local thisZone = event.target
   local phase = event.phase
+  if phase == "ended" and not ctrlDown then
+    if thisZone.mine then
+      transition.to (thisZone, {rotation =180, time = 250, onComplete = function() thisZone.rotation = 0; end })
+    end
+  end
+  return true
 end
 
 local function shake ( event )
@@ -124,6 +130,7 @@ local function createBoard ()
       board[r][c]:setFillColor(.4, .4, .5, 1)
       board[r][c].strokeWidth = 1 ; board[r][c]:setStrokeColor(0,0,0)
       board[r][c]:addEventListener ("mouseHover", shake )
+      board[r][c]:addEventListener ("touch", zoneClicked )
       board[r][c].mine = false
       board[r][c].xCor = c
       board[r][c].yCor = r
