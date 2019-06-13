@@ -2,7 +2,10 @@
 
 -- main.lua
 
---  
+local gridGroup = display.newGroup()
+local board     = display.newGroup()
+local wiper     = display.newGroup()
+ 
 local board = {}
 local boardHeight = 15
 local boardWidth  = 15
@@ -25,7 +28,7 @@ local function placeMines ()
 end
 
 local function createBoard ()
-
+  --for f = 
 end
 
 local function zoneClicked( event )
