@@ -1,0 +1,11 @@
+settings =
+{
+	plugins =
+	{
+		["plugin.mouseHover"] =
+		{
+			-- required
+			publisherId = "sg.btn",
+		},
+	},		
+}
