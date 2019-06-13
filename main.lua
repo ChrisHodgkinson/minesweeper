@@ -1,5 +1,5 @@
 -- Minesweeper
-
+display.setDefault( "background", .5, .5, .5 )
 -- main.lua
 
 local gridGroup = display.newGroup()
@@ -39,11 +39,11 @@ local function createBoard ()
     board[r]={}
     for c = 1, boardWidth do 
       board[r][c] = display.newRect(((32*c)+hOff), ((32*r)+vOff), 31, 31 )
-      board[r][c]:setFillColor(.3, .3, .9, 1)
+      board[r][c]:setFillColor(.4, .4, .5, 1)
       board[r][c].strokeWidth = 1 ; board[r][c]:setStrokeColor(0,0,0)
-      hOff = hOff + 1
+      hOff = hOff + 2
     end
-    vOff = vOff + 1
+    vOff = vOff + 2
   end
 end
 createBoard()
