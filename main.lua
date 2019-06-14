@@ -6,16 +6,21 @@ local debug = true
 display.setDefault( "background", .5, .5, .5 )
 
 
-local gridGroup = display.newGroup()
+local gridGroup      = display.newGroup()
+--local valueGroup    = display.newGroup()
 local boardGroup     = display.newGroup()
+local valueGroup    = display.newGroup()
 local wiperGroup     = display.newGroup()
  
 local board = {}
 local boardHeight = 15
 local boardWidth  = 15
-local totalMines  = 72
+local totalMines  = 40
 local ctrlDown     = false
 
+local colours = {
+  {0,0,1}, {0,1,0}, {1,0,0}, {0,0,.5}, {.5,0,.5}, {.5,.5,1}, {0,.5,0}, {0,0,0}
+}
 
 local function keyListener ( event )
   local phase = event.phase
@@ -24,61 +29,78 @@ local function keyListener ( event )
 end
 
 local function placeNumbers ()
-
+  local squareValue
+  for r = 1, boardHeight do
+    for c = 1, boardWidth do
+      squareValue = 0
+      local toCount = board[r][c].neighbours
+      for f = 1, #toCount do
+        local ffr = toCount[f].y; local ffc = toCount[f].x
+        if board[ffr][ffc].mine then squareValue = squareValue + 1 end
+      end
+      if not board[r][c].mine then
+        board[r][c].value = squareValue
+        if squareValue >0 then
+          board[r][c].showValue.text = tostring(squareValue)
+          board[r][c].showValue:setFillColor(unpack(colours[squareValue]))
+        end
+      end
+    end
+  end
 end
 
 local function getNeighbours ( r, c )
   local neighbours = {}
   if r == 1 then -- top row
-    table.insert ( neighbours, {r+1, c} )
+    table.insert ( neighbours, {y=r+1, x=c} )
     if c == 1 then -- left column
-      table.insert( neighbours, {r, c+1} )
-      table.insert ( neighbours, {r+1, c+1} )
+      table.insert( neighbours, {y=r, x=c+1} )
+      table.insert ( neighbours, {y=r+1, x=c+1} )
     elseif c == boardWidth then -- right column
-      table.insert ( neighbours, {r+1, c-1} )
-      table.insert ( neighbours, {r, c-1} )
+      table.insert ( neighbours, {y=r+1, x=c-1} )
+      table.insert ( neighbours, {y=r, x=c-1} )
     else -- middle columns
-      table.insert ( neighbours, {r, c+1} )
-      table.insert ( neighbours, {r+1, c+1} )
-      table.insert ( neighbours, {r+1, c-1} )
-      table.insert ( neighbours, {r, c-1} )
+      table.insert ( neighbours, {y=r, x=c+1} )
+      table.insert ( neighbours, {y=r+1, x=c+1} )
+      table.insert ( neighbours, {y=r+1, x=c-1} )
+      table.insert ( neighbours, {y=r, x=c-1} )
     end
   elseif r == boardHeight then -- bottom row
-    table.insert ( neighbours, {r-1, c} )
+    table.insert ( neighbours, {y=r-1, x=c} )
     if c == 1 then -- left column
-      table.insert ( neighbours, {r-1, c+1} )
-      table.insert ( neighbours, {r,  c+1} )
+      table.insert ( neighbours, {y=r-1, x=c+1} )
+      table.insert ( neighbours, {y=r,  x=c+1} )
     elseif c == boardWidth then -- right column
-      table.insert ( neighbours, {r, c-1} )
-      table.insert ( neighbours, {r-1, c-1} )
+      table.insert ( neighbours, {y=r, x=c-1} )
+      table.insert ( neighbours, {y=r-1, x=c-1} )
     else -- middle columns
-      table.insert ( neighbours, {r-1, c+1} )
-      table.insert ( neighbours, {r, c+1} )
-      table.insert ( neighbours, {r, c-1} )
-      table.insert ( neighbours, {r-1, c-1} )
+      table.insert ( neighbours, {y=r-1, x=c+1} )
+      table.insert ( neighbours, {y=r, x=c+1} )
+      table.insert ( neighbours, {y=r, x=c-1} )
+      table.insert ( neighbours, {y=r-1, x=c-1} )
     end
   else -- all middle rows
     if c == 1 then -- left column
-      table.insert ( neighbours, {r-1, c} )
-      table.insert ( neighbours, {r-1, c+1} )
-      table.insert ( neighbours, {r, c+1} )
-      table.insert ( neighbours, {r+1, c+1} )
-      table.insert ( neighbours, {r+1, c} )
+      table.insert ( neighbours, {y=r-1, x=c} )
+      table.insert ( neighbours, {y=r-1, x=c+1} )
+      table.insert ( neighbours, {y=r, x=c+1} )
+      table.insert ( neighbours, {y=r+1, x=c+1} )
+      table.insert ( neighbours, {y=r+1, x=c} )
     elseif c == boardWidth then -- right column
-      table.insert ( neighbours, {r=1, c} )
-      table.insert ( neighbours, {r+1, c-1} )
-      table.insert ( neighbours, {r, c-1} )
-      table.insert ( neighbours, {r-1, c-1} )
-      table.insert ( neighbours, {r-1, c} )
+      table.insert ( neighbours, {y=r+1, x=c} )
+      table.insert ( neighbours, {y=r+1, x=c-1} )
+      table.insert ( neighbours, {y=r, x=c-1} )
+      table.insert ( neighbours, {y=r-1, x=c-1} )
+      table.insert ( neighbours, {y=r-1, x=c} )
     else -- middle columns
-      table.insert ( neighbours, {r-1, c} )
-      table.insert ( neighbours, {r-1, c+1} )
-      table.insert ( neighbours, {r, c+1} )
-      table.insert ( neighbours, {r+1, c+1} )
-      table.insert ( neighbours, {r+1, c} )
-      table.insert ( neighbours, {r+1, c-1} )
-      table.insert ( neighbours, {r, c-1} )
-      table.insert ( neighbours, {r-1, c-1} )
+      table.insert ( neighbours, {y=r-1, x=c} )
+      table.insert ( neighbours, {y=r-1, x=c+1} )
+      table.insert ( neighbours, {y=r, x=c+1} )
+      table.insert ( neighbours, {y=r+1, x=c+1} )
+      table.insert ( neighbours, {y=r+1, x=c} )
+      table.insert ( neighbours, {y=r+1, x=c-1} )
+      table.insert ( neighbours, {y=r, x=c-1} )
+      table.insert ( neighbours, {y=r-1, x=c-1} )
     end
   end
   return neighbours
@@ -109,7 +131,7 @@ local function zoneClicked( event )
   return true
 end
 
-local function shake ( event )
+local function highlight ( event )
   local square = event.target
   local phase = event.phase
   if phase == "began" then
@@ -125,15 +147,21 @@ local function createBoard ()
   for r = 1, boardHeight do
     local hOff = 1
     board[r]={}
-    for c = 1, boardWidth do 
-      board[r][c] = display.newRect( boardGroup, ((32*c)+hOff), ((32*r)+vOff), 31, 31 )
+    for c = 1, boardWidth do
+      local x = ((32*c)+hOff)
+      local y = ((32*r)+vOff)
+      board[r][c] = display.newRect( boardGroup, x, y, 31, 31 )
       board[r][c]:setFillColor(.4, .4, .5, 1)
       board[r][c].strokeWidth = 1 ; board[r][c]:setStrokeColor(0,0,0)
-      board[r][c]:addEventListener ("mouseHover", shake )
+      board[r][c]:addEventListener ("mouseHover", highlight )
       board[r][c]:addEventListener ("touch", zoneClicked )
       board[r][c].mine = false
       board[r][c].xCor = c
       board[r][c].yCor = r
+      board[r][c].value = 0
+      board[r][c].showValue = display.newText ( valueGroup, " ", x, y, "conthrax-sb.ttf", 24)
+      board[r][c].marked = false
+      board[r][c].revealed = false
       board[r][c].neighbours = getNeighbours( r, c )
       hOff = hOff + 2
     end
@@ -142,6 +170,7 @@ local function createBoard ()
 end
 createBoard()
 placeMines()
+placeNumbers()
 
 Runtime:addEventListener ( "key", keyListener )
 
