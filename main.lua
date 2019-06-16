@@ -7,9 +7,9 @@ display.setDefault( "background", .5, .5, .5 )
 
 
 local gridGroup      = display.newGroup()
---local valueGroup    = display.newGroup()
-local boardGroup     = display.newGroup()
 local valueGroup    = display.newGroup()
+local boardGroup     = display.newGroup()
+--local valueGroup    = display.newGroup()
 local wiperGroup     = display.newGroup()
  
 local board = {}
@@ -106,6 +106,12 @@ local function getNeighbours ( r, c )
   return neighbours
 end
 
+local function wakeTheNeighbours ( r, c )
+  local neighbour = board [r][c].neighbours
+  --for 
+
+end
+
 local function placeMines ()
   local bombCounter = totalMines
   while bombCounter > 0 do
@@ -123,9 +129,12 @@ end
 local function zoneClicked( event )
   local thisZone = event.target
   local phase = event.phase
-  if phase == "ended" and not ctrlDown then
+  if phase == "ended" and not ctrlDown and not thisZone.revealed then
     if thisZone.mine then
       transition.to (thisZone, {rotation =180, time = 250, onComplete = function() thisZone.rotation = 0; end })
+    elseif not thisZone.mine then
+      transition.to (thisZone, {rotation =180, time = 250, xScale=3, yScale=3, alpha=0 })
+      event.target.revealed = true
     end
   end
   return true
