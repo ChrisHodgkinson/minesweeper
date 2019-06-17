@@ -6,10 +6,10 @@ local debug = true
 display.setDefault( "background", .5, .5, .5 )
 
 
-local gridGroup      = display.newGroup()
+--local gridGroup      = display.newGroup()
 local valueGroup    = display.newGroup()
 local boardGroup     = display.newGroup()
-local wiperGroup     = display.newGroup()
+--local wiperGroup     = display.newGroup()
  
 local board = {}
 local boardHeight = 15
@@ -106,12 +106,19 @@ local function getNeighbours ( r, c )
   return neighbours
 end
 
-local function wakeTheNeighbours ( row, ccol )
+local function wakeTheNeighbours ( row, col )
   local neighbour = board [row][col].neighbours
   for f = 1, #neighbour do
-
+    local fx = neighbour[f].x
+    local fy = neighbour[f].y
+    if board[fy][fx].mine == false then
+      transition.to (board[fy][fx], {rotation =180, time = 250, xScale=3, yScale=3, alpha=0 })
+      board[fy][fx].revealed = true
+      if board[fy][fx].value == 0 then
+        wakeTheNeighbours ( board[fy][fx].yCor, board[fy][fx].xCor )
+      end
+    end
   end 
-
 end
 
 local function placeMines ()
@@ -128,12 +135,17 @@ local function placeMines ()
   end
 end
 
+local function gameOver ( row, col )
+  print("G A M E   O V E R")
+end
+
 local function zoneClicked( event )
   local thisZone = event.target
   local phase = event.phase
   if phase == "ended" and not ctrlDown and not thisZone.revealed then
     if thisZone.mine then
       transition.to (thisZone, {rotation =180, time = 250, onComplete = function() thisZone.rotation = 0; end })
+      gameOver(thisZone)
     elseif not thisZone.mine then
       transition.to (thisZone, {rotation =180, time = 250, xScale=3, yScale=3, alpha=0 })
       thisZone.revealed = true
@@ -141,6 +153,12 @@ local function zoneClicked( event )
         wakeTheNeighbours ( thisZone.yCor, thisZone.xCor )
       end
     end
+  elseif phase == "ended" and ctrlDown and not thisZone.revealed and not thisZone.marked then
+    transition.to (thisZone.fill, {r=0, g=.7, b=0, a=1, time=150, transition=easing.inCubic})
+    thisZone.marked = true
+  elseif phase == "ended" and ctrlDown and not thisZone.revealed and thisZone.marked then
+    transition.to (thisZone.fill, {r=.4, g=.4, b=.5, a=1, time=150, transition=easing.inCubic})
+    thisZone.marked = false
   end
   return true
 end
