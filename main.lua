@@ -9,14 +9,14 @@ display.setDefault( "background", .5, .5, .5 )
 local gridGroup      = display.newGroup()
 local valueGroup    = display.newGroup()
 local boardGroup     = display.newGroup()
---local valueGroup    = display.newGroup()
 local wiperGroup     = display.newGroup()
  
 local board = {}
 local boardHeight = 15
 local boardWidth  = 15
 local totalMines  = 40
-local ctrlDown     = false
+local ctrlDown    = false
+local marked      = 0
 
 local colours = {
   {0,0,1}, {0,1,0}, {1,0,0}, {0,0,.5}, {.5,0,.5}, {.5,.5,1}, {0,.5,0}, {0,0,0}
@@ -106,9 +106,11 @@ local function getNeighbours ( r, c )
   return neighbours
 end
 
-local function wakeTheNeighbours ( r, c )
-  local neighbour = board [r][c].neighbours
-  --for 
+local function wakeTheNeighbours ( row, ccol )
+  local neighbour = board [row][col].neighbours
+  for f = 1, #neighbour do
+
+  end 
 
 end
 
@@ -134,7 +136,10 @@ local function zoneClicked( event )
       transition.to (thisZone, {rotation =180, time = 250, onComplete = function() thisZone.rotation = 0; end })
     elseif not thisZone.mine then
       transition.to (thisZone, {rotation =180, time = 250, xScale=3, yScale=3, alpha=0 })
-      event.target.revealed = true
+      thisZone.revealed = true
+      if thisZone.value == 0 then
+        wakeTheNeighbours ( thisZone.yCor, thisZone.xCor )
+      end
     end
   end
   return true
