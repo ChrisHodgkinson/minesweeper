@@ -1,4 +1,6 @@
 local composer = require ( "composer" )
+local mouseHover = require ( "plugin.mouseHover" )
+
 local M = {}
   function M.new ( params ) -- { group, x, y, width, height }
     local group = params.group
@@ -12,6 +14,8 @@ local M = {}
     cell.revealed = false
     cell.neighbours = {}
     
+
+
     function cell.highlight ( self, event )
       local phase = event.phase
       if phase == "began" then
@@ -21,7 +25,8 @@ local M = {}
         transition.to ( self, {xScale = 1, yScale = 1, time = 100})
       end
     end
-
+    cell:addEventListener ( "touch", clicked )
+    cell:addEventListener ( "mouseHover", highlight )
     return cell
   end
 return M
