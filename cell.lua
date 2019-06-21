@@ -11,6 +11,17 @@ local M = {}
     cell.flagged = false
     cell.revealed = false
     cell.neighbours = {}
+    
+    function cell.highlight ( self, event )
+      local phase = event.phase
+      if phase == "began" then
+        self:toFront()
+        transition.to ( self, {xScale = 1.3, yScale = 1.3, time = 100} )
+      elseif phase == "ended" then
+        transition.to ( self, {xScale = 1, yScale = 1, time = 100})
+      end
+    end
+
     return cell
   end
 return M
