@@ -5,15 +5,13 @@ local debug = true
 
 display.setDefault( "background", .5, .5, .5 )
 
-
---local gridGroup      = display.newGroup()
 local valueGroup    = display.newGroup()
 local boardGroup     = display.newGroup()
---local wiperGroup     = display.newGroup()
+
  
 local board = {}
-local boardHeight = 15
-local boardWidth  = 15
+local boardHeight = 16
+local boardWidth  = 16
 local totalMines  = 40
 local ctrlDown    = false
 local marked      = 0
@@ -111,11 +109,12 @@ local function wakeTheNeighbours ( row, col )
   for f = 1, #neighbour do
     local fx = neighbour[f].x
     local fy = neighbour[f].y
-    if board[fy][fx].mine == false then
-      transition.to (board[fy][fx], {rotation =180, time = 250, xScale=3, yScale=3, alpha=0 })
-      board[fy][fx].revealed = true
-      if board[fy][fx].value == 0 then
-        wakeTheNeighbours ( board[fy][fx].yCor, board[fy][fx].xCor )
+    local thisCell = board[fy][fx]
+    if thisCell.mine == false and thisCell.revealed == false then
+      transition.to (thisCell, {rotation =180, time = 250, xScale=3, yScale=3, alpha=0 })
+      thisCell.revealed = true
+      if thisCell.value == 0 then
+        wakeTheNeighbours ( fy, fx )
       end
     end
   end 
