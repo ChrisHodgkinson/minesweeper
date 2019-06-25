@@ -1,7 +1,7 @@
 -- Minesweeper
 -- main.lua
 local mouseHover = require ( "plugin.mouseHover" )
-local debug = true
+local debug = false
 
 display.setDefault( "background", .5, .5, .5 )
 
@@ -179,9 +179,9 @@ local function createBoard ()
     local hOff = 1
     board[r]={}
     for c = 1, boardWidth do
-      local x = ((32*c)+hOff)
-      local y = ((32*r)+vOff)
-      board[r][c] = display.newRect( boardGroup, x, y, 31, 31 )
+      local x = ((24*c)+hOff)
+      local y = ((24*r)+vOff)
+      board[r][c] = display.newRect( boardGroup, x, y, 23, 23 )
       board[r][c]:setFillColor(.4, .4, .5, 1)
       board[r][c].strokeWidth = 1 ; board[r][c]:setStrokeColor(0,0,0)
       board[r][c]:addEventListener ("mouseHover", highlight )
@@ -190,7 +190,7 @@ local function createBoard ()
       board[r][c].xCor = c
       board[r][c].yCor = r
       board[r][c].value = 0
-      board[r][c].showValue = display.newText ( valueGroup, " ", x, y, "conthrax-sb.ttf", 24)
+      board[r][c].showValue = display.newText ( valueGroup, " ", x, y, "conthrax-sb.ttf", 18)
       board[r][c].marked = false
       board[r][c].revealed = false
       board[r][c].neighbours = getNeighbours( r, c )
