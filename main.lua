@@ -228,7 +228,7 @@ end
 createBoard()
 placeMines()
 placeNumbers()
-
+print ("Group W:", mainGroup.width)
 Runtime:addEventListener ( "key", keyListener )
 
 
