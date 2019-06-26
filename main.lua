@@ -1,13 +1,25 @@
 -- Minesweeper
 -- main.lua
 local mouseHover = require ( "plugin.mouseHover" )
+local stars = require ( "stars" )
 local debug = false
 
-display.setDefault( "background", .5, .5, .5 )
+local _x = display.actualContentWidth * 0.5
+local _y = display.actualContentHeight * 0.5
 
+display.setDefault( "background", 0, 0, 0 )
+
+local bgGroup       = display.newGroup()
+local mainGroup = display.newGroup()
 local valueGroup    = display.newGroup()
-local boardGroup     = display.newGroup()
-
+local boardGroup    = display.newGroup()
+mainGroup:insert(valueGroup)
+mainGroup:insert(boardGroup)
+mainGroup.anchorChildren = true
+mainGroup.anchorX = .5
+mainGroup.anchorY = .5
+mainGroup.x = _x
+mainGroup.y = _y
  
 local board = {}
 local boardHeight = 16
@@ -16,8 +28,21 @@ local totalMines  = 40
 local ctrlDown    = false
 local marked      = 0
 
+local fooBG = display.newImage ("grass.jpg")
+local imgW = fooBG.width
+local imgH = fooBG.height
+display.remove(fooBG)
+fooBG = nil
+local bground = display.newImageRect( bgGroup, "grass.jpg", imgW, imgH )
+bground.x, bground.y = _x, _y
+
 local colours = {
   {0,0,1}, {0,1,0}, {1,0,0}, {0,0,.5}, {.5,0,.5}, {.5,.5,1}, {0,.5,0}, {0,0,0}
+}
+local levels = {
+  easy = {h = 9, w = 9, m = 10},
+  medium = {h = 16, w = 16, m = 40},
+  hard = {h=16, w = 30, m = 99}
 }
 
 local function keyListener ( event )
@@ -159,6 +184,7 @@ local function zoneClicked( event )
     transition.to (thisZone.fill, {r=.4, g=.4, b=.5, a=1, time=150, transition=easing.inCubic})
     thisZone.marked = false
   end
+  print ("X:", thisZone.x)
   return true
 end
 
@@ -179,7 +205,7 @@ local function createBoard ()
     local hOff = 1
     board[r]={}
     for c = 1, boardWidth do
-      local x = ((24*c)+hOff)
+      local x =  (24*c)+hOff--199+((24*c)+hOff) -- ((24*c)+hOff)
       local y = ((24*r)+vOff)
       board[r][c] = display.newRect( boardGroup, x, y, 23, 23 )
       board[r][c]:setFillColor(.4, .4, .5, 1)
