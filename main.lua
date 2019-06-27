@@ -2,7 +2,7 @@
 -- main.lua
 local mouseHover = require ( "plugin.mouseHover" )
 local stars = require ( "stars" )
-local debug = false
+local debug = true
 
 local _x = display.actualContentWidth * 0.5
 local _y = display.actualContentHeight * 0.5
@@ -20,24 +20,19 @@ mainGroup.anchorX = .5
 mainGroup.anchorY = .5
 mainGroup.x = _x
 mainGroup.y = _y
- 
+
+local starField = {}
+local boardBG
 local board = {}
 local boardHeight = 16
-local boardWidth  = 16
-local totalMines  = 40
+local boardWidth  = 30
+local totalMines  = 99
 local ctrlDown    = false
 local marked      = 0
-
-local fooBG = display.newImage ("grass.jpg")
-local imgW = fooBG.width
-local imgH = fooBG.height
-display.remove(fooBG)
-fooBG = nil
-local bground = display.newImageRect( bgGroup, "grass.jpg", imgW, imgH )
-bground.x, bground.y = _x, _y
-
+local minesLeft = 0
+local minesText
 local colours = {
-  {0,0,1}, {0,1,0}, {1,0,0}, {0,0,.5}, {.5,0,.5}, {.5,.5,1}, {0,.5,0}, {0,0,0}
+  {0,0,1}, {0,1,0}, {1,0,0}, {.5,.5,0}, {.5,0,.5}, {.5,.5,1}, {0,.5,0}, {0,0,0}
 }
 local levels = {
   easy = {h = 9, w = 9, m = 10},
@@ -145,6 +140,10 @@ local function wakeTheNeighbours ( row, col )
   end 
 end
 
+local function shakeObject (object)
+  --
+end
+
 local function placeMines ()
   local bombCounter = totalMines
   while bombCounter > 0 do
@@ -154,6 +153,7 @@ local function placeMines ()
     if not board[row][col].mine then
       board[row][col].mine = true
       bombCounter = bombCounter -1
+      minesLeft = minesLeft + 1
       if debug then board[row][col]:setFillColor( .5, .4, .4 ); end
     end
   end
@@ -169,6 +169,7 @@ local function zoneClicked( event )
   if phase == "ended" and not ctrlDown and not thisZone.revealed then
     if thisZone.mine then
       transition.to (thisZone, {rotation =180, time = 250, onComplete = function() thisZone.rotation = 0; end })
+      shakeObject(mainGroup)
       gameOver(thisZone)
     elseif not thisZone.mine then
       transition.to (thisZone, {rotation =180, time = 250, xScale=3, yScale=3, alpha=0 })
@@ -177,14 +178,16 @@ local function zoneClicked( event )
         wakeTheNeighbours ( thisZone.yCor, thisZone.xCor )
       end
     end
-  elseif phase == "ended" and ctrlDown and not thisZone.revealed and not thisZone.marked then
+  elseif phase == "ended" and ctrlDown and not thisZone.revealed and not thisZone.marked and minesLeft >0 then
     transition.to (thisZone.fill, {r=0, g=.7, b=0, a=1, time=150, transition=easing.inCubic})
     thisZone.marked = true
+    minesLeft = minesLeft - 1
   elseif phase == "ended" and ctrlDown and not thisZone.revealed and thisZone.marked then
     transition.to (thisZone.fill, {r=.4, g=.4, b=.5, a=1, time=150, transition=easing.inCubic})
     thisZone.marked = false
+    minesLeft = minesLeft + 1
   end
-  print ("X:", thisZone.x)
+  minesText.text = "MINES: "..tostring(minesLeft)
   return true
 end
 
@@ -224,11 +227,32 @@ local function createBoard ()
     end
     vOff = vOff + 2
   end
+  local bw, bh = boardGroup.width, boardGroup.height
+  boardBG = display.newRoundedRect ( _x, _y, bw+100, bh+150, 25 )
+  boardBG:setFillColor(.3,0,.3, .3)
+  boardBG.strokeWidth = 2
+  boardBG:toBack()
+  minesText = display.newText("MINES: "..tostring(minesLeft), _x, 100, "conthrax-sb", 36 )
 end
+
+local function updateStars()
+  for i = 1, #starField do
+    starField[i]:update()
+  end
+end
+
+local function createStars()
+  for i = 1, 200 do
+    starField[i]=stars.new( bgGroup, 10 )
+  end
+  Runtime:addEventListener( "enterFrame", updateStars )
+end
+
+createStars()
 createBoard()
 placeMines()
 placeNumbers()
-print ("Group W:", mainGroup.width)
+
 Runtime:addEventListener ( "key", keyListener )
 
 
