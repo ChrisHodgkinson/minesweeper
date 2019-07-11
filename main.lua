@@ -2,7 +2,7 @@
 -- main.lua
 local mouseHover = require ( "plugin.mouseHover" )
 local stars = require ( "stars" )
-local debug = true
+local debug = false
 
 local _x = display.actualContentWidth * 0.5
 local _y = display.actualContentHeight * 0.5
@@ -21,6 +21,7 @@ mainGroup.anchorY = .5
 mainGroup.x = _x
 mainGroup.y = _y
 
+local bw, bh
 local starField = {}
 local boardBG
 local board = {}
@@ -131,7 +132,7 @@ local function wakeTheNeighbours ( row, col )
     local fy = neighbour[f].y
     local thisCell = board[fy][fx]
     if thisCell.mine == false and thisCell.revealed == false then
-      transition.to (thisCell, {rotation =180, time = 250, xScale=3, yScale=3, alpha=0 })
+      thisCell.alpha = 0  --transition.to (thisCell, { time = 250, alpha=0 })
       thisCell.revealed = true
       if thisCell.value == 0 then
         wakeTheNeighbours ( fy, fx )
@@ -154,6 +155,7 @@ local function placeMines ()
       board[row][col].mine = true
       bombCounter = bombCounter -1
       minesLeft = minesLeft + 1
+      minesText.text = "MINES: "..tostring(minesLeft)
       if debug then board[row][col]:setFillColor( .5, .4, .4 ); end
     end
   end
@@ -167,22 +169,30 @@ local function zoneClicked( event )
   local thisZone = event.target
   local phase = event.phase
   if phase == "ended" and not ctrlDown and not thisZone.revealed then
+    -- If an unclicked space is clicked and CTRL is not held down.    
     if thisZone.mine then
-      transition.to (thisZone, {rotation =180, time = 250, onComplete = function() thisZone.rotation = 0; end })
+      -- If the space contains a mine.
+      --transition.to (thisZone, { time = 250, onComplete = function() thisZone.rotation = 0; end })
       shakeObject(mainGroup)
       gameOver(thisZone)
     elseif not thisZone.mine then
-      transition.to (thisZone, {rotation =180, time = 250, xScale=3, yScale=3, alpha=0 })
+      -- If the space does not contain a mine.
+      --transition.to (thisZone, { time = 250, xScale=3, yScale=3, alpha=0 })
+      thisZone.alpha = 0
       thisZone.revealed = true
       if thisZone.value == 0 then
+        -- If the space is not adjacent to any mines.
         wakeTheNeighbours ( thisZone.yCor, thisZone.xCor )
       end
+      thisZone.foo = true
     end
   elseif phase == "ended" and ctrlDown and not thisZone.revealed and not thisZone.marked and minesLeft >0 then
-    transition.to (thisZone.fill, {r=0, g=.7, b=0, a=1, time=150, transition=easing.inCubic})
+    -- Mark zone if CTRL is held down and the space is not revealed or marked and the player still has flags left.
+    transition.to (thisZone.fill, {r=.7, g=0, b=0, a=1, time=150, transition=easing.inCubic})
     thisZone.marked = true
     minesLeft = minesLeft - 1
   elseif phase == "ended" and ctrlDown and not thisZone.revealed and thisZone.marked then
+    -- Unmark a previously marked zone.
     transition.to (thisZone.fill, {r=.4, g=.4, b=.5, a=1, time=150, transition=easing.inCubic})
     thisZone.marked = false
     minesLeft = minesLeft + 1
@@ -192,14 +202,14 @@ local function zoneClicked( event )
 end
 
 local function highlight ( event )
-  local square = event.target
-  local phase = event.phase
-  if phase == "began" then
-    square:toFront() 
-    transition.to (square, {xScale = 1.3, yScale = 1.3, time = 100})
-  elseif phase == "ended" then
-    transition.to (square, {xScale = 1, yScale = 1, time = 100})
-  end
+  -- local square = event.target
+  -- local phase = event.phase
+  -- if phase == "began" then
+  --   square:toFront() 
+  --   transition.to (square, {xScale = 1.1, yScale = 1.1, time = 100})
+  -- elseif phase == "ended" then
+  --   transition.to (square, {xScale = 1, yScale = 1, time = 100})
+  -- end
 end
 
 local function createBoard ()
@@ -227,7 +237,8 @@ local function createBoard ()
     end
     vOff = vOff + 2
   end
-  local bw, bh = boardGroup.width, boardGroup.height
+  bw, bh = boardGroup.width, boardGroup.height
+  print ("Board Width : ",bw)
   boardBG = display.newRoundedRect ( _x, _y, bw+100, bh+150, 25 )
   boardBG:setFillColor(.3,0,.3, .3)
   boardBG.strokeWidth = 2
@@ -248,7 +259,7 @@ local function createStars()
   Runtime:addEventListener( "enterFrame", updateStars )
 end
 
-createStars()
+--createStars()
 createBoard()
 placeMines()
 placeNumbers()
