@@ -10,7 +10,7 @@ local _y = display.actualContentHeight * 0.5
 display.setDefault( "background", 0, 0, 0 )
 
 local bgGroup       = display.newGroup()
-local mainGroup = display.newGroup()
+local mainGroup     = display.newGroup()
 local valueGroup    = display.newGroup()
 local boardGroup    = display.newGroup()
 mainGroup:insert(valueGroup)
@@ -161,41 +161,55 @@ local function placeMines ()
   end
 end
 
-local function gameOver ( row, col )
-  print("G A M E   O V E R")
+local function gameOver ( foo )
+  
+  game_playing = false
+  for r = 1, boardHeight do
+    for c = 1, boardWidth do
+      local thisZone = board[r][c]
+      if thisZone.mine then
+        transition.to (thisZone.fill, {r=.7, g=0, b=0, a=1, time=150, transition=easing.inCubic})
+      end
+    end
+  end
+  
 end
 
 local function zoneClicked( event )
   local thisZone = event.target
   local phase = event.phase
-  if phase == "ended" and not ctrlDown and not thisZone.revealed then
-    -- If an unclicked space is clicked and CTRL is not held down.    
-    if thisZone.mine then
-      -- If the space contains a mine.
-      --transition.to (thisZone, { time = 250, onComplete = function() thisZone.rotation = 0; end })
-      shakeObject(mainGroup)
-      gameOver(thisZone)
-    elseif not thisZone.mine then
-      -- If the space does not contain a mine.
-      --transition.to (thisZone, { time = 250, xScale=3, yScale=3, alpha=0 })
-      thisZone.alpha = 0
-      thisZone.revealed = true
-      if thisZone.value == 0 then
-        -- If the space is not adjacent to any mines.
-        wakeTheNeighbours ( thisZone.yCor, thisZone.xCor )
+  if game_playing then
+    if phase == "ended" and not ctrlDown and not thisZone.revealed then
+      -- If an unclicked space is clicked and CTRL is not held down.    
+      if thisZone.mine then
+        -- If the space contains a mine.
+        transition.to (thisZone, { time = 250, onComplete = function() thisZone.rotation = 0; end })
+        
+        print("MinesText.text : "..minesText.text)
+        minesText.text=" "
+        gameOver(thisZone)
+      elseif not thisZone.mine then
+        -- If the space does not contain a mine.
+        transition.to (thisZone, { time = 250, xScale=3, yScale=3, alpha=0 })
+        thisZone.alpha = 0
+        thisZone.revealed = true
+        if thisZone.value == 0 then
+          -- If the space is not adjacent to any mines.
+          wakeTheNeighbours ( thisZone.yCor, thisZone.xCor )
+        end
+        thisZone.foo = true
       end
-      thisZone.foo = true
+    elseif phase == "ended" and ctrlDown and not thisZone.revealed and not thisZone.marked and minesLeft >0 then
+      -- Mark zone if CTRL is held down and the space is not revealed or marked and the player still has flags left.
+      transition.to (thisZone.fill, {r=.7, g=0, b=0, a=1, time=150, transition=easing.inCubic})
+      thisZone.marked = true
+      minesLeft = minesLeft - 1
+    elseif phase == "ended" and ctrlDown and not thisZone.revealed and thisZone.marked then
+      -- Unmark a previously marked zone.
+      transition.to (thisZone.fill, {r=.4, g=.4, b=.5, a=1, time=150, transition=easing.inCubic})
+      thisZone.marked = false
+      minesLeft = minesLeft + 1
     end
-  elseif phase == "ended" and ctrlDown and not thisZone.revealed and not thisZone.marked and minesLeft >0 then
-    -- Mark zone if CTRL is held down and the space is not revealed or marked and the player still has flags left.
-    transition.to (thisZone.fill, {r=.7, g=0, b=0, a=1, time=150, transition=easing.inCubic})
-    thisZone.marked = true
-    minesLeft = minesLeft - 1
-  elseif phase == "ended" and ctrlDown and not thisZone.revealed and thisZone.marked then
-    -- Unmark a previously marked zone.
-    transition.to (thisZone.fill, {r=.4, g=.4, b=.5, a=1, time=150, transition=easing.inCubic})
-    thisZone.marked = false
-    minesLeft = minesLeft + 1
   end
   minesText.text = "MINES: "..tostring(minesLeft)
   return true
@@ -243,28 +257,14 @@ local function createBoard ()
   boardBG:setFillColor(.3,0,.3, .3)
   boardBG.strokeWidth = 2
   boardBG:toBack()
-  minesText = display.newText("MINES: "..tostring(minesLeft), _x, 100, "conthrax-sb", 36 )
+  minesText = display.newText("MINES: "..tostring(minesLeft), _x, 120, "conthrax-sb", 36 )
 end
 
-local function updateStars()
-  for i = 1, #starField do
-    starField[i]:update()
-  end
-end
-
-local function createStars()
-  for i = 1, 200 do
-    starField[i]=stars.new( bgGroup, 10 )
-  end
-  Runtime:addEventListener( "enterFrame", updateStars )
-end
-
---createStars()
 createBoard()
 placeMines()
 placeNumbers()
 
 Runtime:addEventListener ( "key", keyListener )
-
+game_playing = true
 
 -- EOF
