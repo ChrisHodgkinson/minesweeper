@@ -186,8 +186,9 @@ local function zoneClicked( event )
         transition.to (thisZone, { time = 250, onComplete = function() thisZone.rotation = 0; end })
         
         print("MinesText.text : "..minesText.text)
-        minesText.text=" "
+        minesText.text="[ SAD FACE ]"
         gameOver(thisZone)
+        return true
       elseif not thisZone.mine then
         -- If the space does not contain a mine.
         transition.to (thisZone, { time = 250, xScale=3, yScale=3, alpha=0 })
