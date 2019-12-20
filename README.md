@@ -9,7 +9,7 @@ Oops.
 
 I really should learn to think before speaking.
 
-After a few weeks of an hour or so every few days and a lot of hair pulling trying to work out how to do things I finally got a working game.  It's not flashy and doesn't have any front end or game over screen but it works.
+After a few weeks of an hour or so every few days and a lot of hair pulling trying to work out how to do things I finally got a working game.  It's not flashy and doesn't have any front end or game over screen but it works.  
 Oh, and when you win/lose you have to refresh the simulator to restart as I didn't get around to putting that in.
 
 ---
