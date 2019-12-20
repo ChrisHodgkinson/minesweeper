@@ -16,7 +16,7 @@ The project makes use of the free 'Mouse Hover' plug-in by BTN which is availabl
 https://marketplace.coronalabs.com/corona-plugins/mouse-hover
 This is for a purely cosmetic effect and is not essential for the game to work.
 
-I also used the Conthrax-SB font as it's one that I relly like, but you'll have to download that yourself or use something different.
+I also used the Conthrax-SB font as it's one that I really like, but you'll have to download that yourself or use something different.
 https://www.dafont.com/conthrax.font
 
 So here it is.  Feel free to have a play around with it, change it, learn from it etc.  
