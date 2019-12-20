@@ -1,11 +1,10 @@
 -- Minesweeper
 -- main.lua
 local mouseHover = require ( "plugin.mouseHover" )
-local stars = require ( "stars" )
 local debug = false
 
-local _x = display.actualContentWidth * 0.5
-local _y = display.actualContentHeight * 0.5
+local _x = display.actualContentWidth * 0.5  -- Horizontal center of display
+local _y = display.actualContentHeight * 0.5 -- Vertical center of display
 
 display.setDefault( "background", 0, 0, 0 )
 
@@ -22,7 +21,6 @@ mainGroup.x = _x
 mainGroup.y = _y
 
 local bw, bh
-local starField = {}
 local boardBG
 local board = {}
 local boardHeight = 16
@@ -132,7 +130,7 @@ local function wakeTheNeighbours ( row, col )
     local fy = neighbour[f].y
     local thisCell = board[fy][fx]
     if thisCell.mine == false and thisCell.revealed == false then
-      thisCell.alpha = 0  --transition.to (thisCell, { time = 250, alpha=0 })
+      thisCell.alpha = 0
       thisCell.revealed = true
       if thisCell.value == 0 then
         wakeTheNeighbours ( fy, fx )
@@ -141,14 +139,9 @@ local function wakeTheNeighbours ( row, col )
   end 
 end
 
-local function shakeObject (object)
-  --
-end
-
 local function placeMines ()
   local bombCounter = totalMines
   while bombCounter > 0 do
-    --local rnum = math.random (  * boardWidth )
     local row = math.random( 1, boardHeight )
     local col = math.random( 1, boardWidth )
     if not board[row][col].mine then
@@ -162,7 +155,6 @@ local function placeMines ()
 end
 
 local function gameOver ( foo )
-  
   game_playing = false
   for r = 1, boardHeight do
     for c = 1, boardWidth do
@@ -172,7 +164,6 @@ local function gameOver ( foo )
       end
     end
   end
-  
 end
 
 local function zoneClicked( event )
@@ -180,7 +171,7 @@ local function zoneClicked( event )
   local phase = event.phase
   if game_playing then
     if phase == "ended" and not ctrlDown and not thisZone.revealed then
-      -- If an unclicked space is clicked and CTRL is not held down.    
+      -- If an unclicked space is clicked and CTRL is NOT held down.    
       if thisZone.mine then
         -- If the space contains a mine.
         transition.to (thisZone, { time = 250, onComplete = function() thisZone.rotation = 0; end })
@@ -217,14 +208,14 @@ local function zoneClicked( event )
 end
 
 local function highlight ( event )
-  -- local square = event.target
-  -- local phase = event.phase
-  -- if phase == "began" then
-  --   square:toFront() 
-  --   transition.to (square, {xScale = 1.1, yScale = 1.1, time = 100})
-  -- elseif phase == "ended" then
-  --   transition.to (square, {xScale = 1, yScale = 1, time = 100})
-  -- end
+   local square = event.target
+   local phase = event.phase
+   if phase == "began" then
+     square:toFront() 
+     transition.to (square, {xScale = 1.1, yScale = 1.1, time = 100})
+   elseif phase == "ended" then
+    transition.to (square, {xScale = 1, yScale = 1, time = 100})
+   end
 end
 
 local function createBoard ()
@@ -253,7 +244,6 @@ local function createBoard ()
     vOff = vOff + 2
   end
   bw, bh = boardGroup.width, boardGroup.height
-  print ("Board Width : ",bw)
   boardBG = display.newRoundedRect ( _x, _y, bw+100, bh+150, 25 )
   boardBG:setFillColor(.3,0,.3, .3)
   boardBG.strokeWidth = 2
